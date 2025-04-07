@@ -80,7 +80,6 @@ public class RestServer implements AutoCloseable {
         this.app = Javalin.create(this::configure)
                 .start(port);
 
-        this.setupLogging(this.app);
         this.setupErrorHandlers(this.app);
         this.routesClosable = this.setupRoutes(this.app, luckPerms);
 
@@ -265,21 +264,6 @@ public class RestServer implements AutoCloseable {
                 handler.handle(ctx);
             });
         }
-    }
-
-    private void setupLogging(Javalin app) {
-        app.before(ctx -> {
-            ctx.attribute("startTime", System.currentTimeMillis());
-            if (ctx.path().startsWith("/event/")) {
-                LOGGER.info("[REST] %s %s - %d".formatted(ctx.method(), ctx.path(), ctx.status()));
-            }
-        });
-        app.after(ctx -> {
-            //noinspection ConstantConditions
-            long startTime = ctx.attribute("startTime");
-            long duration = System.currentTimeMillis() - startTime;
-            LOGGER.info("[REST] %s %s - %d - %dms".formatted(ctx.method(), ctx.path(), ctx.status(), duration));
-        });
     }
 
 }
